@@ -8,19 +8,19 @@ read USERNAME
 
 USER=$($PSQL "SELECT name FROM users WHERE name='$USERNAME';")
 GAMES_PLAYED=$($PSQL "SELECT games_played FROM users WHERE name='$USERNAME'")
-BEST_GAME=$($PSQL "SELECT best_game FROM users WHERE name='$USERNAME'")
 
 #if no user create one
 if [[ -z $USER ]]
   then
   $PSQL "INSERT INTO users(name, games_played, best_game, number_of_guesses) VALUES('$USERNAME', 0, 0, 0)"
-  echo "Welcome, $USERNAME! It looks like this is your first time here."
+  echo -e "\nWelcome, $USERNAME! It looks like this is your first time here."
 
   else 
-  echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
+  echo -e "\nWelcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
 fi
+BEST_GAME=$($PSQL "SELECT best_game FROM users WHERE name='$USERNAME'")
 
-echo "Guess the secret number between 1 and 1000:"
+echo -e "\nGuess the secret number between 1 and 1000:"
 read GUESS
 
 #add a games_played + 1
@@ -49,9 +49,9 @@ done
 
 $PSQL "UPDATE users SET number_of_guesses = number_of_guesses + 1 WHERE name='$USERNAME'"
 
-if [[ $BEST_GAME == 0 || $BEST_GAME > $NUMBER_OF_GUESSES ]]
+if [ $BEST_GAME == 0 ] || [ $BEST_GAME > $NUMBER_OF_GUESSES ]
 then
-$PSQL "UPDATE users SET best_game = number_of_guesses"
+$PSQL "UPDATE users SET best_game = number_of_guesses WHERE name='$USERNAME'"
 fi
 NUMBER_OF_GUESSES=$($PSQL "SELECT number_of_guesses FROM users WHERE name='$USERNAME'")
 
