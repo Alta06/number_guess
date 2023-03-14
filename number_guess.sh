@@ -2,23 +2,24 @@
 
 PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 SECRET_NUMBER=$(( (RANDOM % 1000) + 1 ))
+NUMBER_OF_GUESSES=1
 
-echo "Enter your username:"
+echo -e "\nEnter your username:"
 read USERNAME
 
-USER=$($PSQL "SELECT name FROM users WHERE name='$USERNAME';")
+USER=$($PSQL "SELECT name FROM users WHERE name='$USERNAME'")
 GAMES_PLAYED=$($PSQL "SELECT games_played FROM users WHERE name='$USERNAME'")
+BEST_GAME=$($PSQL "SELECT best_game FROM users WHERE name='$USERNAME'")
 
 #if no user create one
 if [[ -z $USER ]]
   then
-  $PSQL "INSERT INTO users(name, games_played, best_game, number_of_guesses) VALUES('$USERNAME', 0, 0, 0)"
+  $PSQL "INSERT INTO users(name, games_played, best_game) VALUES('$USERNAME', 0, 0)"
   echo -e "\nWelcome, $USERNAME! It looks like this is your first time here."
 
   else 
   echo -e "\nWelcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
 fi
-BEST_GAME=$($PSQL "SELECT best_game FROM users WHERE name='$USERNAME'")
 
 echo -e "\nGuess the secret number between 1 and 1000:"
 read GUESS
@@ -33,30 +34,26 @@ do
     echo "That is not an integer, guess again:"
     read GUESS
 
-  elif [[ $GUESS < $SECRET_NUMBER ]]
+  elif [[ $GUESS -lt $SECRET_NUMBER ]]
     then 
     echo "It's higher than that, guess again:"
     read GUESS
-    $PSQL "UPDATE users SET number_of_guesses = number_of_guesses + 1 WHERE name='$USERNAME'"
+    ((NUMBER_OF_GUESSES++))
 
-  elif [[ $GUESS > $SECRET_NUMBER ]]
+  elif [[ $GUESS -gt $SECRET_NUMBER ]]
   then
     echo "It's lower than that, guess again:"
     read GUESS
-    $PSQL "UPDATE users SET number_of_guesses = number_of_guesses + 1 WHERE name='$USERNAME'"
+    ((NUMBER_OF_GUESSES++))
     fi
 done
 
-$PSQL "UPDATE users SET number_of_guesses = number_of_guesses + 1 WHERE name='$USERNAME'"
-
-if [ $BEST_GAME == 0 ] || [ $BEST_GAME > $NUMBER_OF_GUESSES ]
-then
-$PSQL "UPDATE users SET best_game = number_of_guesses WHERE name='$USERNAME'"
+if [[ $BEST_GAME -eq 0 ]] || [[ $BEST_GAME -gt $NUMBER_OF_GUESSES ]]
+  then
+  $PSQL "UPDATE users SET best_game = $NUMBER_OF_GUESSES WHERE name='$USERNAME'"
 fi
-NUMBER_OF_GUESSES=$($PSQL "SELECT number_of_guesses FROM users WHERE name='$USERNAME'")
 
 echo "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
 
-$PSQL "UPDATE users SET number_of_guesses = 0 WHERE name='$USERNAME'"
 
 
