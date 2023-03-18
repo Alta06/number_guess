@@ -3,7 +3,7 @@
 PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 
 CREATE_USER() {
-$PSQL "INSERT INTO users(username, games_played, best_game) VALUES('$USERNAME', 0, 0)"
+CREATE_USER_RESULT=$($PSQL "INSERT INTO users(username, games_played, best_game) VALUES('$USERNAME', 0, 0)")
   echo -e "\nWelcome, $USERNAME! It looks like this is your first time here."
 }
 
@@ -25,15 +25,14 @@ if [[ -z $USER ]]
   then
   CREATE_USER
   else
-  echo -e "\nWelcome back, $USER ! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
+  echo -e "\nWelcome back, $USER! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
 fi
 
-echo $SECRET_NUMBER
 echo -e "\nGuess the secret number between 1 and 1000:"
 read GUESS
 
 #add a games_played + 1
-$PSQL "UPDATE users SET games_played = games_played + 1 WHERE username='$USERNAME'"
+UPDATE_GAMES_PLAYED=$($PSQL "UPDATE users SET games_played = games_played + 1 WHERE username='$USERNAME'")
 
 while [[ $GUESS -ne $SECRET_NUMBER ]]
 do
@@ -59,7 +58,7 @@ done
 
 if [[ $BEST_GAME -eq 0 ]] || [[ $BEST_GAME -gt $NUMBER_OF_GUESSES ]]
   then
-  $PSQL "UPDATE users SET best_game = $NUMBER_OF_GUESSES WHERE username='$USERNAME'"
+  UPDATE_GAMES_PLAYED=$($PSQL "UPDATE users SET best_game = $NUMBER_OF_GUESSES WHERE username='$USERNAME'")
 fi
 
 echo "You guessed it in $NUMBER_OF_GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
