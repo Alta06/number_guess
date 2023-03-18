@@ -8,7 +8,7 @@ $PSQL "INSERT INTO users(username, games_played, best_game) VALUES('$USERNAME', 
 }
 
 FIND_USER() {
-  USER=$($PSQL "SELECT username FROM users WHERE username='$USERNAME'")
+USER=$($PSQL "SELECT username FROM users WHERE username='$USERNAME'")
 GAMES_PLAYED=$($PSQL "SELECT games_played FROM users WHERE username='$USERNAME'")
 BEST_GAME=$($PSQL "SELECT best_game FROM users WHERE username='$USERNAME'")
 }
@@ -19,16 +19,13 @@ NUMBER_OF_GUESSES=1
 
 echo -e "\nEnter your username:"
 read USERNAME
-
 FIND_USER
-
 #if no user create one
-
 if [[ -z $USER ]]
   then
   CREATE_USER
   else
-  echo -e "\nWelcome back, $USER! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
+  echo -e "\nWelcome back, $USER ! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
 fi
 
 echo $SECRET_NUMBER
@@ -44,6 +41,7 @@ do
     then
     echo "That is not an integer, guess again:"
     read GUESS
+    ((NUMBER_OF_GUESSES++))
 
   elif [[ $GUESS -lt $SECRET_NUMBER ]]
     then 
